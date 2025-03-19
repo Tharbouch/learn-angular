@@ -52,7 +52,7 @@ Make sure the `app.component.html` has a router outlet to display the routed com
     <h1 class="text-3xl font-bold text-indigo-800">Angular Homes</h1>
   </header>
 
-  <main>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <router-outlet></router-outlet>
   </main>
 </div>
@@ -83,7 +83,7 @@ Now let's create a component to display multiple home listings using Angular sig
 ### 1. Generate the Component
 
 ```bash
-ng generate component components/home-list
+ng generate component home-list
 ```
 
 ### 2. Update the Home List Component with Signals
@@ -94,7 +94,7 @@ Update `home-list.component.ts`:
 import { Component, OnInit, inject, signal, computed } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { HomeCardComponent } from "../home-card/home-card.component";
-import { Home } from "../../models/home";
+import { Home } from "../models/home.type";
 
 @Component({
   selector: "app-home-list",
@@ -138,7 +138,7 @@ Update `app.routes.ts` to include the HomeListComponent:
 
 ```typescript
 import { Routes } from "@angular/router";
-import { HomeListComponent } from "./components/home-list/home-list.component";
+import { HomeListComponent } from "./home-list/home-list.component";
 
 export const routes: Routes = [
   {
@@ -171,7 +171,7 @@ Update `home.service.ts`:
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { Home } from "../models/home";
+import { Home } from "../models/home.type";
 
 @Injectable({
   providedIn: "root",
@@ -219,8 +219,8 @@ Update `home-list.component.ts`:
 import { Component, OnInit, inject, signal, computed } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { HomeCardComponent } from "../home-card/home-card.component";
-import { HomeService } from "../../services/home.service";
-import { Home } from "../../models/home";
+import { HomeService } from "../services/home.service";
+import { Home } from "../models/home.type";
 
 @Component({
   selector: "app-home-list",
@@ -326,7 +326,7 @@ In this step, we'll enhance our application by adding the ability to mark homes 
 
 ### 1. Update the Home Model
 
-First, let's modify our `home.ts` model to include a property for favorite status:
+First, let's modify our `home.type.ts` model to include a property for favorite status:
 
 ```typescript
 /**
@@ -358,7 +358,7 @@ import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { LucideAngularModule, WavesLadder, Bed, Bath, MapPin, Heart } from "lucide-angular";
 
-import { Home } from "../../models/home";
+import { Home } from "../models/home.type";
 
 /**
  * Component for displaying a single home card
@@ -375,11 +375,11 @@ export class HomeCardComponent {
   @Input() home!: Home;
   @Output() toggleFavorite = new EventEmitter<number>();
 
-  readonly wavesLadderIcon = WavesLadder;
-  readonly bedIcon = Bed;
-  readonly bathIcon = Bath;
-  readonly mapPinIcon = MapPin;
-  readonly heartIcon = Heart;
+  readonly WavesLadder = WavesLadder;
+  readonly Bed = Bed;
+  readonly Bath = Bath;
+  readonly MapPin = MapPin;
+  readonly Heart = Heart;
 
   /**
    * Emit the home id when favorite is toggled
@@ -403,8 +403,16 @@ Add a favorite button to the home card:
   <div class="h-48 overflow-hidden relative">
     <img [src]="home.picture" [alt]="home.title" class="w-full h-full object-cover" />
     <!-- Favorite button -->
-    <button (click)="onFavoriteClick()" class="absolute top-2 right-2 p-2 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all" aria-label="Toggle favorite">
-      <lucide-icon [img]="heartIcon" [color]="home.isFavorite ? 'red' : 'gray'" class="w-5 h-5" [ngClass]="{'fill-current text-red-500': home.isFavorite}"></lucide-icon>
+    <button
+      (click)="onFavoriteClick()"
+      class="absolute top-2 right-2 p-2 bg-opacity-80 rounded-full shadow-lg hover:bg-opacity-100 transition-all cursor-pointer"
+      aria-label="Toggle favorite"
+      [ngClass]="{
+        'bg-indigo-500': home.isFavorite,
+        'bg-white': !home.isFavorite
+      }"
+    >
+      <lucide-icon [img]="Heart" [color]="home.isFavorite ? 'white' : 'gray'" class="w-5 h-5"></lucide-icon>
     </button>
   </div>
 
@@ -418,11 +426,11 @@ Add a favorite button to the home card:
 Let's update the HomeListComponent to track and manage favorite status:
 
 ```typescript
-import { Component, OnInit, inject, signal, computed, effect } from "@angular/core";
+import { Component, OnInit, inject, signal, computed } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { HomeCardComponent } from "../home-card/home-card.component";
-import { HomeService } from "../../services/home.service";
-import { Home } from "../../models/home";
+import { HomeService } from "../services/home.service";
+import { Home } from "../models/home.type";
 
 @Component({
   selector: "app-home-list",
